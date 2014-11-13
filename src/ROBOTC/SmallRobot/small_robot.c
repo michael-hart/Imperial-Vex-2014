@@ -1,71 +1,40 @@
-#pragma platform(VEX)
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	FILE: small_robot.c
+//	ORIGINAL AUTHOR: MH1613
+//	DESCRIPTION: This file is a ROBOTC file, based on the competition control template
+// 	from Vex Robotics. It defines how the robot should behave in autonomous mode without
+//  user input, and how controls sent remotely should be interpreted.
+//
+/////////////////////////////////////////////////////////////////////////////////////////
 
-//Competition Control and Duration Settings
+// Competition includes and defines
+#pragma platform(VEX)
 #pragma competitionControl(Competition)
 #pragma autonomousDuration(20)
 #pragma userControlDuration(120)
+#include "Vex_Competition_Includes.c"
 
-#include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
+// Public function definitions
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                          Pre-Autonomous Functions
-//
-// You may want to perform some actions before the competition starts. Do them in the
-// following function.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// pre_auton: Used to set up the robots with initial servo positions etc. before the
+// start of the competition.
 void pre_auton()
 {
-  // Set bStopTasksBetweenModes to false if you want to keep user created tasks running between
-  // Autonomous and Tele-Op modes. You will need to manage all user created tasks if set to false.
   bStopTasksBetweenModes = true;
-
-	// All activities that occur before the competition starts
-	// Example: clearing encoders, setting servo positions, ...
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 Autonomous Task
-//
-// This task is used to control your robot during the autonomous phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// autonomous: defines how the robot behaves in autonomous mode.
 task autonomous()
 {
-  // .....................................................................................
-  // Insert user code here.
-  // .....................................................................................
-
 	AutonomousCodePlaceholderForTesting();  // Remove this function call once you have "real" code.
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//                                 User Control Task
-//
-// This task is used to control your robot during the user control phase of a VEX Competition.
-// You must modify the code to add your own robot specific commands here.
-//
-/////////////////////////////////////////////////////////////////////////////////////////
-
+// usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
-	// User control code here, inside the loop
-
 	while (true)
 	{
-	  // This is the main execution loop for the user control program. Each time through the loop
-	  // your program should update motor + servo values based on feedback from the joysticks.
-
-	  // .....................................................................................
-	  // Insert user code here. This is where you use the joystick values to update your motors, etc.
-	  // .....................................................................................
-
 	  UserControlCodePlaceholderForTesting(); // Remove this function call once you have "real" code.
 	}
 }
