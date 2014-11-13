@@ -15,6 +15,9 @@
 #pragma userControlDuration(120)
 #include "Vex_Competition_Includes.c"
 
+// Robot includes and defines
+#include "../common/lcd.h"
+
 // Public function definitions
 
 // pre_auton: Used to set up the robots with initial servo positions etc. before the
