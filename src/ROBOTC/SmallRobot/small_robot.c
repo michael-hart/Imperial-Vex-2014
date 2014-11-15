@@ -13,10 +13,17 @@
 #pragma competitionControl(Competition)
 #pragma autonomousDuration(20)
 #pragma userControlDuration(120)
+#pragma config(UART_Usage, UART2, uartVEXLCD, baudRate19200, IOPins, None, None)
 #include "Vex_Competition_Includes.c"
+
 
 // Robot includes and defines
 #include "../common/lcd.h"
+
+void setup_lcd(string welcome_message) {
+	lcd_set_welcome_message(welcome_message);
+	// TODO: Add autonomous programs here
+}
 
 // Public function definitions
 
