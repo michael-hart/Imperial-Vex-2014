@@ -23,7 +23,15 @@
 
 void setup_lcd(string welcome_message) {
 	lcd_set_welcome_message(welcome_message);
-	// TODO: Add autonomous programs here
+	// Save string to variable because ROBOTC sucks
+	string s = "Autonomous 1";
+	lcd_add_auton_prog(s);
+	s = "Autonomous 2";
+	lcd_add_auton_prog(s);
+	s = "User Conf 1";
+	lcd_add_user_config(s);
+	s = "User Conf 2";
+	lcd_add_user_config(s);
 }
 
 // pre_auton: Used to set up the robots with initial servo positions etc. before the
@@ -42,8 +50,8 @@ task autonomous()
 // usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
-	string welcome = "Hello, World!";
-	lcd_set_welcome_message(welcome);
+	string welcome = "ICRS VEX 2014";
+	setup_lcd(welcome);
 	while (true)
 	{
 		lcd_poll();

@@ -15,6 +15,10 @@
 
 void lcd_set_welcome_message(string welcome_message);
 void lcd_poll();
+bool lcd_add_auton_prog(string auton_prog_name);
+bool lcd_add_user_config(string user_conf_name);
+int lcd_get_auton_prog();
+int lcd_get_user_conf();
 
 #include "lcd.c";
 
