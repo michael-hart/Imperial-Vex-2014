@@ -41,8 +41,11 @@ task autonomous()
 // usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
+	string welcome = "Hello, World!";
+	lcd_set_welcome_message(welcome);
 	while (true)
 	{
-	  UserControlCodePlaceholderForTesting(); // Remove this function call once you have "real" code.
+		lcd_poll();
+		wait1Msec(50);
 	}
 }

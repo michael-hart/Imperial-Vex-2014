@@ -16,16 +16,15 @@
 #pragma config(UART_Usage, UART2, uartVEXLCD, baudRate19200, IOPins, None, None)
 #include "Vex_Competition_Includes.c"
 
-
 // Robot includes and defines
 #include "../common/lcd.h"
+
+// Public function definitions
 
 void setup_lcd(string welcome_message) {
 	lcd_set_welcome_message(welcome_message);
 	// TODO: Add autonomous programs here
 }
-
-// Public function definitions
 
 // pre_auton: Used to set up the robots with initial servo positions etc. before the
 // start of the competition.
@@ -43,8 +42,11 @@ task autonomous()
 // usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
+	string welcome = "Hello, World!";
+	lcd_set_welcome_message(welcome);
 	while (true)
 	{
-	  UserControlCodePlaceholderForTesting(); // Remove this function call once you have "real" code.
+		lcd_poll();
+		wait1Msec(50);
 	}
 }
