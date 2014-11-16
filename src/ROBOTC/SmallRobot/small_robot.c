@@ -21,8 +21,8 @@
 
 // Public function definitions
 
-void setup_lcd(string welcome_message) {
-	lcd_set_welcome_message(welcome_message);
+void setup_lcd() {
+	lcd_setup();
 	// Save string to variable because ROBOTC sucks
 	string s = "Autonomous 1";
 	lcd_add_auton_prog(s);
@@ -50,11 +50,14 @@ task autonomous()
 // usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
-	string welcome = "ICRS VEX 2014";
-	setup_lcd(welcome);
+	setup_lcd();
 	while (true)
 	{
 		lcd_poll();
+		if (lcd_auton_requested())
+		{
+			StartTask(autonomous);
+		}
 		wait1Msec(50);
 	}
 }
