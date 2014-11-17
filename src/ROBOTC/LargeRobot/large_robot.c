@@ -13,15 +13,18 @@
 #pragma competitionControl(Competition)
 #pragma autonomousDuration(20)
 #pragma userControlDuration(120)
+#pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartVEXLCD, baudRate19200, IOPins, None, None)
 #include "Vex_Competition_Includes.c"
 
 // Robot includes and defines
 #include "../common/lcd.h"
+#include "../common/uart.h"
 
 // Public function definitions
-void setup_lcd(string welcome_message) {
-	lcd_set_welcome_message(welcome_message);
+
+void setup_lcd() {
+	lcd_setup();
 	// TODO: Add autonomous programs here
 }
 
@@ -41,11 +44,17 @@ task autonomous()
 // usercontrol: Defines how the robot reacts to user input sent from a remote control
 task usercontrol()
 {
-	string welcome = "Hello, World!";
-	lcd_set_welcome_message(welcome);
+	setup_lcd();
 	while (true)
 	{
 		lcd_poll();
+		if (uart_poll())
+		{
+			string rx;
+			string **pp_rx = &(&rx);
+			uart_get_cmd(pp_rx);
+			writeDebugStreamLine(**pp_rx);
+		}
 		wait1Msec(50);
 	}
 }

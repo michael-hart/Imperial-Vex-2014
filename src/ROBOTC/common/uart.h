@@ -12,6 +12,10 @@
 #ifndef _UART_H
 #define _UART_H
 
+bool uart_poll();
+void uart_get_cmd(string **pp_rx);
+void uart_xmit(string tx);
+
 #include "uart.c";
 
 #endif // _UART_H

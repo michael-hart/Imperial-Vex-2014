@@ -13,11 +13,13 @@
 #pragma competitionControl(Competition)
 #pragma autonomousDuration(20)
 #pragma userControlDuration(120)
+#pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartVEXLCD, baudRate19200, IOPins, None, None)
 #include "Vex_Competition_Includes.c"
 
 // Robot includes and defines
 #include "../common/lcd.h"
+#include "../common/uart.h"
 
 // Public function definitions
 
@@ -57,6 +59,13 @@ task usercontrol()
 		if (lcd_auton_requested())
 		{
 			StartTask(autonomous);
+		}
+		if (uart_poll())
+		{
+			string rx;
+			string **pp_rx = &(&rx);
+			uart_get_cmd(pp_rx);
+			writeDebugStreamLine(**pp_rx);
 		}
 		wait1Msec(50);
 	}
