@@ -53,19 +53,13 @@ task autonomous()
 task usercontrol()
 {
 	setup_lcd();
+	StartTask(uart);
 	while (true)
 	{
 		lcd_poll();
 		if (lcd_auton_requested())
 		{
 			StartTask(autonomous);
-		}
-		if (uart_poll())
-		{
-			string rx;
-			string **pp_rx = &(&rx);
-			uart_get_cmd(pp_rx);
-			writeDebugStreamLine(**pp_rx);
 		}
 		wait1Msec(50);
 	}

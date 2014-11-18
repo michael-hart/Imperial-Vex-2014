@@ -14,7 +14,7 @@
 
 bool uart_poll();
 void uart_get_cmd(string **pp_rx);
-void uart_xmit(string tx);
+void uart_xmit(byte* tx, int count);
 
 #include "uart.c";
 
