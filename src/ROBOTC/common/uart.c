@@ -53,7 +53,7 @@ unsigned long last_heartbeat_sent = 0;
 unsigned long last_heartbeat_rcvd = 0;
 
 static void read_all();
-static bool check_fletcher(byte* data, int count, short checksum);
+static bool check_fletcher(byte* data, int count, unsigned short checksum);
 static void xmit_heartbeat();
 static void xmit_acknowledge(byte packet_number);
 static short calculate_fletcher_16(byte* data, int count);
@@ -138,8 +138,8 @@ static void read_all()
 		{
 			// Check packet is valid
 			if (!check_fletcher(rx_buf.data, PACKET_SIZE-2,
-				rx_buf.data[PACKET_SIZE-1] << 8
-					+ rx_buf.data[PACKET_SIZE]))
+				rx_buf.data[PACKET_SIZE-2] << 8
+					+ rx_buf.data[PACKET_SIZE-1]))
 			{
 				dropped_packets++;
 			}
@@ -190,7 +190,7 @@ static short calculate_fletcher_16( byte* data, int count )
   return (sum2 << 8) | sum1;
 }
 
-static bool check_fletcher(byte* data, int count, short checksum)
+static bool check_fletcher(byte* data, int count, unsigned short checksum)
 {
 	unsigned short csum;
 	csum = calculate_fletcher_16(data, count);
