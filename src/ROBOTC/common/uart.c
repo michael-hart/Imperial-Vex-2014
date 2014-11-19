@@ -42,6 +42,7 @@ packet rx_msg_queue[QUEUE_LIMIT];
 packet rx_buf;
 packet tx_msg_queue[QUEUE_LIMIT];
 check_packet tx_ack_queue[QUEUE_LIMIT];
+byte	rx_cmd_data[2];
 
 int rx_queue_size = 0, tx_queue_size = 0;
 int rx_buf_size = 0, tx_buf_size = 0;
@@ -134,7 +135,7 @@ static void read_all()
 	while (c != 0x100)
 	{
 		rx_buf.data[rx_buf_size++] = c;
-		if (rx_buf_size > PACKET_SIZE)
+		if (rx_buf_size >= PACKET_SIZE)
 		{
 			// Check packet is valid
 			if (!check_fletcher(rx_buf.data, PACKET_SIZE-2,
@@ -145,7 +146,33 @@ static void read_all()
 			}
 			else
 			{
-				// TODO: Implement
+				char command_name=rx_buf.data[0];
+				switch (command_name){
+
+					case RX_HEARTBEAT:
+					last_heartbeat_rcvd=T1;
+					break;
+
+					case RX_ROTATE:
+					case RX_SCORE:
+					case RX_LIFT_HEIGHT:
+					rx_cmd_data[0]=rx_buf.data[0];
+					rx_cmd_data[1]=rx_buf.data[2];
+					rx_msg_queue[rx_queue_size++]=rx_cmd_data;
+					xmit_acknowledge(rx_buf.data[1]); //sending acknowledge
+					break;
+
+					case RX_ACKNOWLEDGE:
+					;//TO DO
+					break;
+
+
+
+
+				}
+
+				xmit_acknowledge(rx_buf.data[1]);
+				//todo
 			}
 		}
 	}
