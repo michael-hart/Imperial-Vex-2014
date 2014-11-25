@@ -162,7 +162,16 @@ static void read_all()
 						break;
 
 					case RX_ACKNOWLEDGE:
-					;// TODO: Implement ACK from
+						// Check all commands for ID; Remove packet and break
+						// if ID matches
+						for (int i = 0; i < tx_ack_queue_size; i++)
+						{
+							if (tx_ack_queue[i].original.data[1] == rx_buf[2])
+							{
+								tx_ack_queue[i] = tx_ack_queue[tx_ack_queue_size--];
+								break;
+							}
+						}
 					break;
 
 				}
