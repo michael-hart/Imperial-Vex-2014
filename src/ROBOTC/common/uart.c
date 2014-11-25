@@ -38,11 +38,10 @@ typedef struct {
 } check_packet;
 
 string current_message;
-packet rx_msg_queue[QUEUE_LIMIT];
+byte rx_msg_queue[QUEUE_LIMIT][2];
 packet rx_buf;
 packet tx_msg_queue[QUEUE_LIMIT];
 check_packet tx_ack_queue[QUEUE_LIMIT];
-byte	rx_cmd_data[2];
 
 int rx_queue_size = 0, tx_queue_size = 0;
 int rx_buf_size = 0, tx_buf_size = 0;
@@ -150,29 +149,23 @@ static void read_all()
 				switch (command_name){
 
 					case RX_HEARTBEAT:
-					last_heartbeat_rcvd=T1;
-					break;
+						last_heartbeat_rcvd=T1;
+						break;
 
+					case RX_FORWARD:
 					case RX_ROTATE:
 					case RX_SCORE:
 					case RX_LIFT_HEIGHT:
-					rx_cmd_data[0]=rx_buf.data[0];
-					rx_cmd_data[1]=rx_buf.data[2];
-					rx_msg_queue[rx_queue_size++]=rx_cmd_data;
-					xmit_acknowledge(rx_buf.data[1]); //sending acknowledge
-					break;
+						rx_msg_queue[rx_queue_size][0] = rx_buf.data[0];
+						rx_msg_queue[rx_queue_size++][1] = rx_buf.data[2];
+						xmit_acknowledge(rx_buf.data[1]); //sending acknowledge
+						break;
 
 					case RX_ACKNOWLEDGE:
-					;//TO DO
+					;// TODO: Implement ACK from
 					break;
 
-
-
-
 				}
-
-				xmit_acknowledge(rx_buf.data[1]);
-				//todo
 			}
 		}
 	}
