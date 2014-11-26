@@ -37,15 +37,14 @@ typedef struct {
 	unsigned long time_sent;
 } check_packet;
 
-string current_message;
 byte rx_msg_queue[QUEUE_LIMIT][2];
 packet rx_buf;
 packet tx_msg_queue[QUEUE_LIMIT];
 check_packet tx_ack_queue[QUEUE_LIMIT];
 
 int rx_queue_size = 0, tx_queue_size = 0;
-int rx_buf_size = 0, tx_buf_size = 0;
-int rx_packet_count = 0, tx_packet_count = 0;
+int rx_buf_size = 0;
+int tx_packet_count = 0;
 int tx_ack_queue_size = 0;
 int dropped_packets = 0;
 
@@ -64,9 +63,11 @@ static void xmit_all();
 task uart()
 {
 	ClearTimer(T1);
+	// Clear current UART
+	while (getChar(UART1) != -1) {}
 	while (true)
 	{
-		// TODO: read_all();
+		read_all();
 		// Send our heartbeat
 		if (T1 - last_heartbeat_sent > HEARTBEAT_PERIOD)
 		{
@@ -80,28 +81,8 @@ task uart()
 		}
 		check_ack_queue();
 		xmit_all();
-		wait1Msec(10);
+		wait1Msec(2);
 	}
-}
-
-// uart_poll: Checks for input and returns true if a complete instruction is ready
-bool uart_poll()
-{
-	current_message = "";
-	char c = getChar(UART1);
-
-	while (c != 0x100)
-	{
-		strncatSingleChar(current_message, c, 20);
-		c = getChar(UART1);
-	}
-
-	return strlen(current_message) != 0;
-}
-
-void uart_get_cmd(string **pp_rx)
-{
-	*pp_rx = &current_message;
 }
 
 void uart_xmit(byte* tx, int count)
@@ -130,26 +111,31 @@ void uart_wake_up_bb()
 
 static void read_all()
 {
-	char c = getChar(UART1);
-	while (c != 0x100)
+	int c;
+	while (true)
 	{
-		rx_buf.data[rx_buf_size++] = c;
+		c = getChar(UART1);
+		if (c == -1) return;
+		rx_buf.data[rx_buf_size++] = (char)(c & 0xFF);
 		if (rx_buf_size >= PACKET_SIZE)
 		{
+			rx_buf_size = 0;
+			unsigned short checksum = (rx_buf.data[3] << 8)
+					+ rx_buf.data[4];
 			// Check packet is valid
-			if (!check_fletcher(rx_buf.data, PACKET_SIZE-2,
-				rx_buf.data[PACKET_SIZE-2] << 8
-					+ rx_buf.data[PACKET_SIZE-1]))
+			if (!check_fletcher(rx_buf.data, PACKET_SIZE-2, checksum))
 			{
 				dropped_packets++;
+				return;
 			}
 			else
 			{
+				writeDebugStreamLine("Received Packet %d", rx_buf.data[1]);
 				char command_name=rx_buf.data[0];
 				switch (command_name){
 
 					case RX_HEARTBEAT:
-						last_heartbeat_rcvd=T1;
+						last_heartbeat_rcvd = T1;
 						break;
 
 					case RX_FORWARD:
@@ -166,7 +152,7 @@ static void read_all()
 						// if ID matches
 						for (int i = 0; i < tx_ack_queue_size; i++)
 						{
-							if (tx_ack_queue[i].original.data[1] == rx_buf[2])
+							if (tx_ack_queue[i].original.data[1] == rx_buf.data[2])
 							{
 								tx_ack_queue[i] = tx_ack_queue[tx_ack_queue_size--];
 								break;

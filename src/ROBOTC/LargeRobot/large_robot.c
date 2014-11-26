@@ -52,7 +52,7 @@ task autonomous()
 task usercontrol()
 {
 	setup_lcd();
-	//StartTask(uart);
+	StartTask(uart);
 	while (true)
 	{
 		lcd_poll();
