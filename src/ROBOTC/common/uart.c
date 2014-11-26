@@ -9,17 +9,26 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	LOCAL DEFINITIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// Define global constants
 #define PACKET_SIZE 5
 #define QUEUE_LIMIT 30
 #define TIMEOUT_MS 100
 #define HEARTBEAT_PERIOD 30
 
+// Define Transmit (TX) constants
 #define TX_HEARTBEAT 0x01
 #define TX_LEFT_ENCODER 0x02
 #define TX_RIGHT_ENCODER 0x04
 #define TX_ACKNOWLEDGE 0x08
 #define TX_WAKE_UP 0x10
 
+// Define Receive (RX) constants
 #define RX_HEARTBEAT 0x01
 #define RX_FORWARD 0x02
 #define RX_ROTATE 0x04
@@ -27,29 +36,54 @@
 #define RX_LIFT_HEIGHT 0x10
 #define RX_SCORE 0x20
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	STRUCT DEFINITIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// packet struct contains 5 bytes of data and ack=true if the packet should be
+// acknowledged
 typedef struct {
 	byte data[PACKET_SIZE];
 	bool ack;
 } packet;
 
+// check_packet stuct contains a packet that requires acknowledgement, tracking its sent
+// time to make sure it is acknowledged
 typedef struct {
 	packet original;
 	unsigned long time_sent;
 } check_packet;
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	LOCAL VARIABLES
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// Declare RX/TX buffers
 byte rx_msg_queue[QUEUE_LIMIT][2];
 packet rx_buf;
 packet tx_msg_queue[QUEUE_LIMIT];
 check_packet tx_ack_queue[QUEUE_LIMIT];
 
+// Declare int trackers
 int rx_queue_size = 0, tx_queue_size = 0;
 int rx_buf_size = 0;
 int tx_packet_count = 0;
 int tx_ack_queue_size = 0;
 int dropped_packets = 0;
 
+// Declare heartbeat times, which follow timer T1
 unsigned long last_heartbeat_sent = 0;
 unsigned long last_heartbeat_rcvd = 0;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	PRIVATE FUNCTION DECLARATIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
 
 static void read_all();
 static bool check_fletcher(byte* data, int count, unsigned short checksum);
@@ -60,11 +94,20 @@ static void build_xmit_cmd(byte cmd, byte data, bool ack_required);
 static void check_ack_queue();
 static void xmit_all();
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	TASK DEFINITIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// Continuously checks the UART and stores a queue of commands that require action
 task uart()
 {
+	// Clear T1
 	ClearTimer(T1);
 	// Clear current UART
 	while (getChar(UART1) != -1) {}
+	// Continuously check t1
 	while (true)
 	{
 		read_all();
@@ -85,6 +128,14 @@ task uart()
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	PUBLIC FUNCTION DEFINITIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// uart_xmit: Given a pointer to a byte array and the array length, transmits the bytes
+// over UART1
 void uart_xmit(byte* tx, int count)
 {
 	int i = 0;
@@ -92,23 +143,39 @@ void uart_xmit(byte* tx, int count)
 	{
 		sendChar(UART1, tx[i]);
 	}
+	// Ensure data has been sent
+	while (!bXmitComplete(UART1))
+	{
+		wait1Msec(1);
+	}
 }
 
+// uart_xmit_left_encoder: Helper method that calls uart_xmit with left_encoder data
 void uart_xmit_left_encoder(byte data)
 {
 	build_xmit_cmd(TX_LEFT_ENCODER, data, true);
 }
 
+// uart_xmit_right_encoder: Helper method that calls uart_xmit with right_encoder data
 void uart_xmit_right_encoder(byte data)
 {
 	build_xmit_cmd(TX_RIGHT_ENCODER, data, true);
 }
 
+// uart_wake_up_bb: Wake up BeagleBoard with Wake Up command
 void uart_wake_up_bb()
 {
 	build_xmit_cmd(TX_WAKE_UP, 0, true);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	PRIVATE FUNCTION DEFINITIONS
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// read_all: Checks the UART for complete messages and confirms their checksum. Also
+// adds the messages to the queue if they require action
 static void read_all()
 {
 	int c;
@@ -166,16 +233,20 @@ static void read_all()
 	}
 }
 
+// xmit_heartbeat: Transmits a heartbeat packet
 static void xmit_heartbeat()
 {
 	build_xmit_cmd(TX_HEARTBEAT, 0, false);
 }
 
+// xmit_acknowledge: acknowledges a packet received from the BB
 static void xmit_acknowledge(byte packet_number)
 {
 	build_xmit_cmd(TX_HEARTBEAT, packet_number, false);
 }
 
+// build_xmit_cmd: Helper method that fills a byte buffer with the
+// command data and calculates a checksum using fletcher-16
 static void build_xmit_cmd(byte cmd, byte data, bool ack_required)
 {
 	packet tx;
@@ -190,6 +261,8 @@ static void build_xmit_cmd(byte cmd, byte data, bool ack_required)
 	tx_msg_queue[tx_queue_size++] = tx;
 }
 
+// calculate-fletcher-16: Calculates a checksum given a byte
+// array and length
 static short calculate_fletcher_16( byte* data, int count )
 {
 	short sum1 = 0;
@@ -205,6 +278,9 @@ static short calculate_fletcher_16( byte* data, int count )
   return (sum2 << 8) | sum1;
 }
 
+// check_fletcher: Given an existing checksum and the data used to
+// calculate it, confirms that the given checksum is identical to the
+// calculated one
 static bool check_fletcher(byte* data, int count, unsigned short checksum)
 {
 	unsigned short csum;
@@ -212,6 +288,8 @@ static bool check_fletcher(byte* data, int count, unsigned short checksum)
 	return csum == checksum;
 }
 
+// check_ack_queue: Iterates over the queue of packets requiring
+// acknowledgement, and resends any that have times out
 static void check_ack_queue()
 {
 	int index = 0;
@@ -233,6 +311,7 @@ static void check_ack_queue()
 	}
 }
 
+// xmit_all: Transmits complete packet queue sequentially
 static void xmit_all()
 {
 	int index = 0;
@@ -249,3 +328,9 @@ static void xmit_all()
 	}
 	tx_queue_size = 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	END OF FILE
+//
+/////////////////////////////////////////////////////////////////////////////////////////

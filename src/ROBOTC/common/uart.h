@@ -14,6 +14,9 @@
 
 task uart();
 void uart_xmit(byte* tx, int count);
+void uart_xmit_left_encoder(byte data);
+void uart_xmit_right_encoder(byte data);
+void uart_wake_up_bb();
 
 #include "uart.c"
 
