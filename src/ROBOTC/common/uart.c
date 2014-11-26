@@ -168,6 +168,33 @@ void uart_wake_up_bb()
 	build_xmit_cmd(TX_WAKE_UP, 0, true);
 }
 
+// uart_cmd_ready: Returns a boolean as to whether there are any commands to
+// act on
+bool uart_cmd_ready()
+{
+	return rx_queue_size > 0;
+}
+
+// uart_copy_cmd: Fills the cmd_queue with command data, along with the number
+// of bytes copied, up to a limit of max_arr_size
+void uart_copy_cmd(byte** cmd_queue, int* bytes_copied, int max_arr_size)
+{
+	*bytes_copied = 0;
+	for (int i = 0; i < rx_queue_size; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			**cmd_queue = rx_msg_queue[i][j];
+			(*cmd_queue)++;
+			(*bytes_copied)++;
+		}
+		if (*bytes_copied + 2 > max_arr_size)
+		{
+			break;
+		}
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //	PRIVATE FUNCTION DEFINITIONS

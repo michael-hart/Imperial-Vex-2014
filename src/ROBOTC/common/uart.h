@@ -17,6 +17,8 @@ void uart_xmit(byte* tx, int count);
 void uart_xmit_left_encoder(byte data);
 void uart_xmit_right_encoder(byte data);
 void uart_wake_up_bb();
+bool uart_cmd_ready();
+void uart_copy_cmd(byte** cmd_queue, int* bytes_copied, int max_arr_size);
 
 #include "uart.c"
 
