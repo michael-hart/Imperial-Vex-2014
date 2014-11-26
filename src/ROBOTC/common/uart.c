@@ -79,6 +79,9 @@ int dropped_packets = 0;
 unsigned long last_heartbeat_sent = 0;
 unsigned long last_heartbeat_rcvd = 0;
 
+// Is the BB online?
+bool bb_online = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //	PRIVATE FUNCTION DECLARATIONS
@@ -110,6 +113,17 @@ task uart()
 	// Continuously check t1
 	while (true)
 	{
+		if (!bb_online)
+		{
+			uart_wake_up_bb();
+			read_all();
+			// Clear tx buffers to prevent overload on wake up
+			tx_queue_size = 0;
+			tx_ack_queue_size = 0;
+			wait1Msec(100);
+			continue;
+		}
+
 		read_all();
 		// Send our heartbeat
 		if (T1 - last_heartbeat_sent > HEARTBEAT_PERIOD)
@@ -120,7 +134,7 @@ task uart()
 		// Check BB heartbeat
 		if (T1 - last_heartbeat_rcvd > TIMEOUT_MS)
 		{
-			// TODO: Handle comms drop
+			bb_online = false;
 		}
 		check_ack_queue();
 		xmit_all();
@@ -165,7 +179,7 @@ void uart_xmit_right_encoder(byte data)
 // uart_wake_up_bb: Wake up BeagleBoard with Wake Up command
 void uart_wake_up_bb()
 {
-	build_xmit_cmd(TX_WAKE_UP, 0, true);
+	build_xmit_cmd(TX_WAKE_UP, 0, false);
 }
 
 // uart_cmd_ready: Returns a boolean as to whether there are any commands to
@@ -224,6 +238,7 @@ static void read_all()
 			}
 			else
 			{
+				bb_online = true;
 				writeDebugStreamLine("Received Packet %d", rx_buf.data[1]);
 				char command_name=rx_buf.data[0];
 				switch (command_name){
