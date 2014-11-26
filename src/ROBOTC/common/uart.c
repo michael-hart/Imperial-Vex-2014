@@ -120,7 +120,7 @@ task uart()
 			// Clear tx buffers to prevent overload on wake up
 			tx_queue_size = 0;
 			tx_ack_queue_size = 0;
-			wait1Msec(100);
+			wait1Msec(50);
 			continue;
 		}
 
