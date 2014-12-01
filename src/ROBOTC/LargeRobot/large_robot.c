@@ -15,6 +15,21 @@
 // 	from Vex Robotics. It defines how the robot should behave in autonomous mode without
 //  user input, and how controls sent remotely should be interpreted.
 //
+//		MOTOR CONFIGURATION
+//
+//			1. Left Front Drive	(PE)			6. Right Back Drive
+//			2. Right Front Drive					7. Left Back Drive
+//			3. Left Lift Upper						8. Left Lift Lower
+//			4. Right Lift Upper						9. Right Lift Lower
+//			5. Strafe (Both via Y-cable) 10. Intake (Both via Y-cable)
+//
+//		COMMS CONFIGURATION
+//
+//			UART1. BeagleBone Link
+//			UART2. LCD Screen
+//			I2C.   Backup BeagleBone Link
+//
+//
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // Competition includes and defines
