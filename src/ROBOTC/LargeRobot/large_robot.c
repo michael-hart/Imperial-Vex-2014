@@ -50,6 +50,37 @@ void setup_lcd() {
 	// TODO: Add autonomous programs here
 }
 
+void update_direction(int &state_direction, int &direction)
+{
+
+		switch (state_direction)
+		{
+			case 0: if (vexRT(Btn7U))
+			{
+				state_direction = 3;
+				direction = 1;
+			}
+			break;
+			case 1: if(!vexRT(Btn7U))
+			{
+				state_direction = 0;
+			}
+			break;
+			case 2: if(vexRT(Btn7U))
+			{
+				state_direction = 1;
+				direction = 0;
+			}
+			break;
+			case 3: if(!vexRT(Btn7U))
+			{
+				state_direction = 2;
+			}
+			break;
+			default: state_direction =0;
+	 		break;
+	}
+}
 // pre_auton: Used to set up the robots with initial servo positions etc. before the
 // start of the competition.
 void pre_auton()
@@ -68,11 +99,20 @@ task usercontrol()
 {
 	setup_lcd();
 	StartTask(uart);
+	int state_direction = 0; //3 is reverse & btnhi, 2 is reverse & btnlo, 1 is forward & btnhi, 0 is forward & btnlo : suggested by Erwei
+	int direction = 0; // 0 is forward, 1 is reverse
+
 	while (true)
 	{
 		lcd_poll();
+
 		int rightDrive = (-vexRT[Ch3] + vexRT[Ch1])/2; // Left/Right motors
 		int leftDrive = (-vexRT[Ch3] - vexRT[Ch1])/2;
+
+		if (!direction){
+	  rightDrive = -rightDrive;
+	  leftDrive = -leftDrive;
+		}
 		motor[FrontLeft] = leftDrive;
 		motor[BackLeft] = leftDrive;
 		motor[BackRight] = rightDrive;
@@ -80,6 +120,9 @@ task usercontrol()
 
 		motor[StrafeLeft] = vexRT[Ch4];
 		motor[StrafeRight] = vexRT[Ch4];
+
+		update_direction(state_direction, direction);
+
 		wait1Msec(50);
 	}
 }
