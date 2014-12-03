@@ -32,6 +32,11 @@
 //			UART2. LCD Screen
 //			I2C.   Backup BeagleBone Link
 //
+//		SENSOR CONFIGURATION
+//
+//		Potentiometers.
+//		Rotary Encoders.
+//
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,8 +114,14 @@ task usercontrol()
 	{
 		lcd_poll();
 
-		int rightDrive = (-vexRT[Ch3] + vexRT[Ch1])/2; // Left/Right motors
-		int leftDrive = (-vexRT[Ch3] - vexRT[Ch1])/2;
+		// Look at limiting factor
+
+
+		int rightDrive = (-vexRT[Ch3] + vexRT[Ch1]); // Left/Right motors
+		int leftDrive = (-vexRT[Ch3] - vexRT[Ch1]);
+
+		//int rightDrive = -vexRT[Ch3]; // Left/Right motors
+		//int leftDrive = -vexRT[Ch2];
 
 		if (!direction){
 	  rightDrive = -rightDrive;
@@ -126,10 +137,10 @@ task usercontrol()
 
 		motor[Intake] = (vexRT[Btn6D] - vexRT[Btn6U]) * 127;
 
-		motor[LeftLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 50 ;
-		motor[RightLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 50 ;
-		motor[LeftLift2] = (vexRT[Btn5D] - vexRT[Btn5U])* 50 ;
-		motor[RightLift2] = (vexRT[Btn5D] - vexRT[Btn5U]) * 50 ;
+		motor[LeftLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
+		motor[RightLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
+		motor[LeftLift2] = (vexRT[Btn5D] - vexRT[Btn5U])* 127 ;
+		motor[RightLift2] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
 
 		motor[Strafe] = vexRT[Ch4];
 
