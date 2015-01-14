@@ -1,4 +1,6 @@
 #pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
+#pragma config(Sensor, in1,    pot_left,       sensorPotentiometer)
+#pragma config(Sensor, in2,    pot_right,      sensorPotentiometer)
 #pragma config(Motor,  port1,           RightLift1,    tmotorVex393, openLoop, reversed)
 #pragma config(Motor,  port2,           LeftLift1,     tmotorVex393, openLoop)
 #pragma config(Motor,  port3,           Intake,        tmotorVex393, openLoop)
@@ -58,6 +60,10 @@ void setup_lcd() {
 	// TODO: Add autonomous programs here
 }
 
+int max(int a, int b) {
+	return a > b ? a : b;
+}
+
 void update_direction(int &state_direction, int &direction)
 {
 
@@ -115,10 +121,15 @@ task usercontrol()
 		lcd_poll();
 
 		// Look at limiting factor
+		// 1404 downwards
+		int left_pot = 1426 - SensorValue[pot_left];
 
+		// 660 upwards
+		int right_pot = SensorValue[pot_right] - 777;
+		writeDebugStreamLine("Left: %d; Right: %d.", left_pot, right_pot);
 
-		int rightDrive = (-vexRT[Ch3] + vexRT[Ch1]); // Left/Right motors
-		int leftDrive = (-vexRT[Ch3] - vexRT[Ch1]);
+		int rightDrive = (-vexRT[Ch3] + vexRT[Ch4]); // Left/Right motors
+		int leftDrive = (-vexRT[Ch3] - vexRT[Ch4]);
 
 		//int rightDrive = -vexRT[Ch3]; // Left/Right motors
 		//int leftDrive = -vexRT[Ch2];
@@ -132,17 +143,46 @@ task usercontrol()
 		motor[BackRight] = rightDrive;
 		motor[FrontRight] = rightDrive;
 
-
-
-
 		motor[Intake] = (vexRT[Btn6D] - vexRT[Btn6U]) * 127;
 
-		motor[LeftLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
-		motor[RightLift1] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
-		motor[LeftLift2] = (vexRT[Btn5D] - vexRT[Btn5U])* 127 ;
-		motor[RightLift2] = (vexRT[Btn5D] - vexRT[Btn5U]) * 127 ;
+		int left_lift_rate, right_lift_rate;
+		if (abs(right_pot - left_pot) < 500) {
+			switch (vexRT[Btn5D] - vexRT[Btn5U]) {
+				// 1 is down
+				case 1:
+					left_lift_rate = 127 - (max(0, right_pot - left_pot) * 3);
+					right_lift_rate = 127 - (max(0, left_pot - right_pot) * 3);
+					break;
+				// 0 is straighten up
+				case 0:
+					left_lift_rate = (left_pot - right_pot) * 1;
+					right_lift_rate = (right_pot - left_pot) * 1;
+					break;
+				// -1 is up
+				case -1:
+					left_lift_rate = (max(0, left_pot - right_pot) * 3) - 127;
+					right_lift_rate = (max(0, right_pot - left_pot) * 3) - 127;
+					break;
+			}
+		} else {
+			// Assume we've reached here because motors have cut.
+			motor[FrontLeft] = 0;
+			motor[FrontRight] = 0;
+			motor[BackLeft] = 0;
+			motor[BackRight] = 0;
+			motor[Strafe] = 0;
+			left_lift_rate = 0;
+			right_lift_rate = 0;
+			wait1Msec(3000); // Time for motors to come back
+		}
+		// if motors cut out, we're boned for any movement, so stop and readjust
 
-		motor[Strafe] = vexRT[Ch4];
+		motor[LeftLift1] = left_lift_rate;
+		motor[RightLift1] = right_lift_rate;
+		motor[LeftLift2] = left_lift_rate;
+		motor[RightLift2] = right_lift_rate;
+
+		motor[Strafe] = vexRT[Ch1];
 
 		update_direction(state_direction, direction);
 
