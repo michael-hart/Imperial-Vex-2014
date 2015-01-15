@@ -117,34 +117,35 @@ task usercontrol()
 	int state_direction = 0; //3 is reverse & btnhi, 2 is reverse & btnlo, 1 is forward & btnhi, 0 is forward & btnlo : suggested by Erwei
 	int direction = 0; // 0 is forward, 1 is reverse
 
+	int left_pot = 0, right_pot = 0, prev_left_pot, prev_right_pot;
+	prev_left_pot = 1426 - SensorValue[pot_left];
+	prev_right_pot = SensorValue[pot_right] - 777;
+
+	int state_requested_lift_direction = 0; // 0 for up, 1 for still, 2 for down
+	int base_lift_power = 100;
+	int lift_power_multiplier = 1;
+
 	while (true)
 	{
 		lcd_poll();
 
-		// Look at limiting factor
-		// 1404 downwards
+		/* Begin our lift checking and potentiometer
+		* - Normalise our pot measurements
+		* - Compare with previous pot measurements for our differential
+		* - Differential gives speed, so adjust base motor power and difference multiplier to compensate
+		* - Apply motor power based on user input, difference between pot positions and differential state
+		* - Check limits to ensure the lift does not attempt to move past top/bottom of robot
+		*/
+
+		// Left pot start position is 1426, moving downwards
 		int left_pot = 1426 - SensorValue[pot_left];
 
-		// 660 upwards
+		// Right pot start position is 777, moving upwards
 		int right_pot = SensorValue[pot_right] - 777;
-		writeDebugStreamLine("Left: %d; Right: %d.", left_pot, right_pot);
+		//writeDebugStreamLine("Left: %d; Right: %d.", left_pot, right_pot);
 
-		int rightDrive = (-vexRT[Ch3] + vexRT[Ch4]); // Left/Right motors
-		int leftDrive = (-vexRT[Ch3] - vexRT[Ch4]);
+		state_requested_lift_direction = vexRT[Btn5D] - vexRT[Btn5U] + 1;
 
-		//int rightDrive = -vexRT[Ch3]; // Left/Right motors
-		//int leftDrive = -vexRT[Ch2];
-
-		if (!direction){
-	  rightDrive = -rightDrive;
-	  leftDrive = -leftDrive;
-		}
-		motor[FrontLeft] = leftDrive;
-		motor[BackLeft] = leftDrive;
-		motor[BackRight] = rightDrive;
-		motor[FrontRight] = rightDrive;
-
-		motor[Intake] = (vexRT[Btn6D] - vexRT[Btn6U]) * 127;
 
 		int left_lift_rate, right_lift_rate;
 		if (abs(right_pot - left_pot) < 500) {
@@ -176,7 +177,20 @@ task usercontrol()
 			right_lift_rate = 0;
 			wait1Msec(3000); // Time for motors to come back
 		}
-		// if motors cut out, we're boned for any movement, so stop and readjust
+
+		int rightDrive = (-vexRT[Ch3] + vexRT[Ch4]); // Left/Right motors
+		int leftDrive = (-vexRT[Ch3] - vexRT[Ch4]);
+
+		if (!direction){
+	  rightDrive = -rightDrive;
+	  leftDrive = -leftDrive;
+		}
+		motor[FrontLeft] = leftDrive;
+		motor[BackLeft] = leftDrive;
+		motor[BackRight] = rightDrive;
+		motor[FrontRight] = rightDrive;
+
+		motor[Intake] = (vexRT[Btn6D] - vexRT[Btn6U]) * 127;
 
 		motor[LeftLift1] = left_lift_rate;
 		motor[RightLift1] = right_lift_rate;
