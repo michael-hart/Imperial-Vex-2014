@@ -36,8 +36,9 @@
 //
 //		SENSOR CONFIGURATION
 //
-//		Potentiometers.
-//		Rotary Encoders.
+//			1. (Analog) Left Lift Potentiometer
+//			2. (Analog) Right Lift Potentiometer
+//		TODO Rotary Encoders.
 //
 //
 /////////////////////////////////////////////////////////////////////////////////////////
