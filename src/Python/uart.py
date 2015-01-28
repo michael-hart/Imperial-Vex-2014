@@ -42,13 +42,12 @@ class BB_UART:
             if len(self.buffer) > 4:
             	c = self.buffer[:5]
             	self.buffer = self.buffer[5:]
-            	print "c is:"
-            	print c
             	print "fletcher of c is:"
             	print fletcher.fletcher16(c)
             	return hex(' '.join(c))
         else:
             time.sleep(10)
+            return None
     
     def cleanup(self):
         self.serial.close()
@@ -64,6 +63,9 @@ def uart_main():
     uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
+    	result = lcd.poll()
+    	if not result is None:
+    		print result
 	time.sleep(0.01)    	
 
 if __name__ == '__main__':
