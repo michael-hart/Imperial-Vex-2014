@@ -5,6 +5,7 @@ import serial
 import atexit
 import threading
 import time
+import fletcher
 
 ser = None
 continue_thread = True
@@ -41,6 +42,7 @@ class BB_UART:
             if len(self.buffer) > 4:
             	c = self.buffer[:5]
             	self.buffer = self.buffer[5:]
+            	print fletcher.fletcher16(self.buffer)
             	return hex(' '.join(c))
         else:
             time.sleep(10)
