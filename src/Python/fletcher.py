@@ -16,10 +16,9 @@ def fletcher16(data_to_checksum):
     return compute(data_to_checksum, 8, 255, limit=21)
 	
 def compare_checksum(data_to_checksum, checksum):
-	if fletcher16(data_to_checksum) == checksum:
-		return True
-	else:
-		return False
-		
+    chk = fletcher16(data_to_checksum)
+    return ((chk / 100 == ord(checksum[0])) & (chk % 100 == ord(checksum[1])))
+	
+	
 if __name__ == "__main__":
     import test.fletcher_test
