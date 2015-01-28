@@ -34,11 +34,14 @@ class BB_UART:
 	if continue_thread == False:
 		cleanup()
 		return
-        c = self.serial.read()
+        c = self.serial.read(5)
         if not c is None:
-            self.buffer += self.serial.read()
+            self.buffer += c
             # Split buffer into five and check fletcher
-            return self.buffer[-1]
+            if len(self.buffer) > 4:
+            	c = self.buffer[:5]
+            	self.buffer = self.buffer[5:]
+            	return hex(' '.join(c))
         else:
             time.sleep(10)
     
