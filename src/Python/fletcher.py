@@ -1,5 +1,5 @@
 from _int import *
-def compute(data_to_checksum, size, modulo, limit = None)
+def compute(data_to_checksum, size, modulo, limit = None):
     sum, sum_of_sum = 1, 0
     length = len(data_to_checksum)
     if limit is not None and length > limit:
