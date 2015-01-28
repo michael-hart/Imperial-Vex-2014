@@ -1,5 +1,5 @@
 
-def compute(data_to_checksum, size, modulo, limit = None):
+def compute(data_to_checksum, size, modulo=255, limit = None):
     _sum, sum_of_sum = 1, 0
     length = len(data_to_checksum)
     if limit is not None and length > limit:
@@ -13,7 +13,7 @@ def compute(data_to_checksum, size, modulo, limit = None):
     return (sum_of_sum << (size / 2 )) + _sum
 
 def fletcher16(data_to_checksum):
-    return compute(data_to_checksum, 8, limit=21)
+    return compute(data_to_checksum, 8, 255, limit=21)
 
 if __name__ == "__main__":
     import test.fletcher_test
