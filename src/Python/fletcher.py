@@ -14,6 +14,12 @@ def compute(data_to_checksum, size, modulo=255, limit = None):
 
 def fletcher16(data_to_checksum):
     return compute(data_to_checksum, 8, 255, limit=21)
-
+	
+def compare_checksum(data_to_checksum, checksum):
+	if fletcher16(data_to_checksum) == checksum:
+		return True
+	else:
+		return False
+		
 if __name__ == "__main__":
     import test.fletcher_test
