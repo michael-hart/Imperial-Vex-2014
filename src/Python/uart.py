@@ -22,10 +22,10 @@ class BB_UART:
     def write(self, s):
         """ Writes the string s to the serial port """
         assert type(s) == str
-        self.serial.write(str)
+        self.serial.write(s)
         
     def poll(self):
-        return self.read()
+        return self.serial.read()
     
     def cleanup(self):
         self.serial.close()
@@ -37,10 +37,11 @@ def uart_main():
     if uart == None:
         print "Failed to open"
         return
-    uart.write("Hello, World!")
+    print "writing to uart"
+    uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
-        s = uart.poll()
+        s = uart.poll()	    
         if len(s) > 0:
             print s
 
