@@ -42,7 +42,10 @@ class BB_UART:
             if len(self.buffer) > 4:
             	c = self.buffer[:5]
             	self.buffer = self.buffer[5:]
-            	print fletcher.fletcher16(self.buffer)
+            	print "c is:"
+            	print c
+            	print "fletcher of c is:"
+            	print fletcher.fletcher16(c)
             	return hex(' '.join(c))
         else:
             time.sleep(10)
