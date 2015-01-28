@@ -1,13 +1,13 @@
 #pragma config(UART_Usage, UART1, uartUserControl, baudRate115200, IOPins, None, None)
 #pragma config(Sensor, in1,    pot_left,       sensorPotentiometer)
 #pragma config(Sensor, in2,    pot_right,      sensorPotentiometer)
-#pragma config(Motor,  port1,           RightLift1,    tmotorVex393, openLoop, reversed)
-#pragma config(Motor,  port2,           LeftLift1,     tmotorVex393, openLoop)
+#pragma config(Motor,  port1,           RightLift1,    tmotorVex393, openLoop)
+#pragma config(Motor,  port2,           LeftLift1,     tmotorVex393, openLoop, reversed)
 #pragma config(Motor,  port3,           Intake,        tmotorVex393, openLoop)
 #pragma config(Motor,  port4,           FrontRight,    tmotorVex393, openLoop)
 #pragma config(Motor,  port5,           FrontLeft,     tmotorVex393, openLoop, reversed)
-#pragma config(Motor,  port6,           LeftLift2,     tmotorVex393, openLoop)
-#pragma config(Motor,  port7,           RightLift2,    tmotorVex393, openLoop)
+#pragma config(Motor,  port6,           LeftLift2,     tmotorVex393, openLoop, reversed)
+#pragma config(Motor,  port7,           RightLift2,    tmotorVex393, openLoop, reversed)
 #pragma config(Motor,  port8,           Strafe,        tmotorVex393, openLoop, reversed)
 #pragma config(Motor,  port9,           BackLeft,      tmotorVex393, openLoop, reversed)
 #pragma config(Motor,  port10,          BackRight,     tmotorVex393, openLoop, reversed)
@@ -138,11 +138,11 @@ task usercontrol()
 		*/
 
 		// Left pot start position is 1426, moving downwards
-		int left_pot = 1426 - SensorValue[pot_left];
+		int left_pot = 1386 - SensorValue[pot_left];
 
-		// Right pot start position is 777, moving upwards
-		int right_pot = SensorValue[pot_right] - 777;
-		//writeDebugStreamLine("Left: %d; Right: %d.", left_pot, right_pot);
+		// Right pot start position is 700, moving upwards
+		int right_pot = SensorValue[pot_right] - 820;
+		writeDebugStreamLine("Left: %d; Right: %d.", left_pot, right_pot);
 
 		state_requested_lift_direction = vexRT[Btn5D] - vexRT[Btn5U] + 1;
 
