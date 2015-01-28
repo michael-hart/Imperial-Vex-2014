@@ -44,7 +44,7 @@ class BB_UART:
             	self.buffer = self.buffer[5:]
             	print "fletcher of c is:"
             	print fletcher.fletcher16(c)
-            	return map(lambda n: format(n, 'x'), c)
+            	return map(lambda n: format(int(n), 'x'), c)
         else:
             time.sleep(10)
             return None
@@ -63,7 +63,7 @@ def uart_main():
     uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
-    	result = lcd.poll()
+    	result = uart.poll()
     	if not result is None:
     		print result
 	time.sleep(0.01)    	
