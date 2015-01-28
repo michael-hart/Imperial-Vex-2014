@@ -63,10 +63,6 @@ def uart_main():
     print "writing to uart"
     uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
-    while True:
-        s = uart.poll()	    
-        if len(s) > 0:
-            print s
 
 if __name__ == '__main__':
     uart_main()
