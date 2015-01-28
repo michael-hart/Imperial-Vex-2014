@@ -44,7 +44,7 @@ class BB_UART:
             	self.buffer = self.buffer[5:]
             	print "fletcher of c is:"
             	print fletcher.fletcher16(c)
-            	return map(lambda n: format(int(n), 'x'), c)
+            	return map(lambda n: format(ord(n), 'x'), c)
         else:
             time.sleep(10)
             return None
