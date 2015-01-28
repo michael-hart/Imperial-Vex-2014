@@ -3,6 +3,8 @@
 import Adafruit_BBIO.UART as UART
 import serial
 import atexit
+import threading
+import time
 
 ser = None
 
@@ -18,6 +20,9 @@ class BB_UART:
         self.serial.open()
         assert self.serial.isOpen()
         atexit.register(self.cleanup)
+        self.thread = threading.Thread(target=self.poll, args=())
+        self.thread.start()
+        self.buffer = []
     
     def write(self, s):
         """ Writes the string s to the serial port """
@@ -25,10 +30,17 @@ class BB_UART:
         self.serial.write(s)
         
     def poll(self):
-        return self.serial.read()
+        c = self.serial.read()
+        if len(c) > 0:
+            self.buffer += self.serial.read()
+            # Split buffer into five and check fletcher
+            return self.buffer[-1]
+        else:
+            time.sleep(10)
     
     def cleanup(self):
         self.serial.close()
+        self.thread.stop()
         # Not yet implemented, but will be done
         # UART.cleanup()
         
