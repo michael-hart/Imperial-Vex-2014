@@ -7,6 +7,7 @@ import threading
 import time
 
 ser = None
+continue_thread = True
 
 class BB_UART:
     """ A class containing methods for BeagleBoard UART """
@@ -30,8 +31,11 @@ class BB_UART:
         self.serial.write(s)
         
     def poll(self):
+	if continue_thread == False:
+		cleanup()
+		return
         c = self.serial.read()
-        if len(c) > 0:
+        if not c is None:
             self.buffer += self.serial.read()
             # Split buffer into five and check fletcher
             return self.buffer[-1]
@@ -40,7 +44,6 @@ class BB_UART:
     
     def cleanup(self):
         self.serial.close()
-        self.thread.stop()
         # Not yet implemented, but will be done
         # UART.cleanup()
         
