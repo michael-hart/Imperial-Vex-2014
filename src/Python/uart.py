@@ -3,8 +3,12 @@
 import Adafruit_BBIO.UART as UART
 import serial
 import atexit
+import threading
+import time
+import fletcher
 
 ser = None
+continue_thread = True
 
 class BB_UART:
     """ A class containing methods for BeagleBoard UART """
@@ -18,14 +22,32 @@ class BB_UART:
         self.serial.open()
         assert self.serial.isOpen()
         atexit.register(self.cleanup)
+        self.thread = threading.Thread(target=self.poll, args=())
+        self.thread.start()
+        self.buffer = []
     
     def write(self, s):
         """ Writes the string s to the serial port """
         assert type(s) == str
-        self.serial.write(str)
+        self.serial.write(s)
         
     def poll(self):
-        return self.read()
+	if continue_thread == False:
+		cleanup()
+		return
+        c = self.serial.read(5)
+        if not c is None:
+            self.buffer += c
+            # Split buffer into five and check fletcher
+            if len(self.buffer) > 4:
+            	c = self.buffer[:5]
+            	self.buffer = self.buffer[5:]
+            	print "fletcher of c is:"
+            	print fletcher.fletcher16(c)
+            	return " ".join(map(lambda n: format(ord(n), 'x'), c))
+        else:
+            time.sleep(10)
+            return None
     
     def cleanup(self):
         self.serial.close()
@@ -37,12 +59,14 @@ def uart_main():
     if uart == None:
         print "Failed to open"
         return
-    uart.write("Hello, World!")
+    print "writing to uart"
+    uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
-        s = uart.poll()
-        if len(s) > 0:
-            print s
+    	result = uart.poll()
+    	if not result is None:
+    		print result
+	time.sleep(0.01)    	
 
 if __name__ == '__main__':
     uart_main()
