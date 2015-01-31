@@ -34,6 +34,7 @@
 
 #include "main.h"
 #include "../common/uart.h"
+#include "../common/lcd.h"
 
 /*
  * Runs the user operator control code. This function will be started in its own task with the
@@ -54,7 +55,8 @@
  */
 void operatorControl() {
 	taskCreate(uartTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
-	printf("Hello, Debug Stream!");
+	taskCreate(lcdTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+	printf("Hello, Debug Stream!\r\n");
 	while (1) {
 		if (!feof(uart2)) {
 			printf("\r\n");

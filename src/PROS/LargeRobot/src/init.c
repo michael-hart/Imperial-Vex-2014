@@ -44,7 +44,7 @@
  */
 void initializeIO() {
 	usartInit(uart1, 19200, NULL);
-	usartInit(uart2, 19200, NULL);
+	lcdInit(uart2);
 }
 
 /*
