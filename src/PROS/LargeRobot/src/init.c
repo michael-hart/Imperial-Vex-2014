@@ -43,6 +43,8 @@
  * configure a UART port (usartOpen()) but cannot set up an LCD (lcdInit()).
  */
 void initializeIO() {
+	usartInit(uart1, 19200, NULL);
+	usartInit(uart2, 19200, NULL);
 }
 
 /*

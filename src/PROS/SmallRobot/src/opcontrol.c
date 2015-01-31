@@ -33,6 +33,7 @@
  */
 
 #include "main.h"
+#include "../common/uart.h"
 
 /*
  * Runs the user operator control code. This function will be started in its own task with the
@@ -52,7 +53,7 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-
+	taskCreate(uartTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 	while (1) {
 		delay(20);
 	}

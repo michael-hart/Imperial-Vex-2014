@@ -43,22 +43,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="cdt.managedbuild.toolchain.gnu.cross.base.1066004663.101627865" name="/" resourcePath="common">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.773069219" name="cdt.managedbuild.toolchain.gnu.cross.base" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="">
-							<option id="cdt.managedbuild.option.gnu.cross.prefix.599893882.573905150" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.599893882"/>
-							<option id="cdt.managedbuild.option.gnu.cross.path.1759346474.768966972" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1759346474"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.180624931" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.1492636040">
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2006696517" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.464932362" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1535676614"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1472262934" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.666130241"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.2052590410" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.274329887"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.499527250" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.1908964275"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1631518813" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.1483972135">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.778695896" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
 					<sourceEntries>
 						<entry excluding="common" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="common"/>
