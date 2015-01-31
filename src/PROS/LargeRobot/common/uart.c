@@ -105,14 +105,15 @@ static void xmit_all();
 // Continuously checks the UART and stores a queue of commands that require action
 void uartTask(void *ignore)
 {
-	// TODO Clear T1
-	// ClearTimer(T1);
 	// Clear current UART
-	while (fgetc(uart1) != -1) {}
-	int current_time = 0;
+	while (!feof(uart1)) {
+		fgetc(uart1);
+	}
+	uint32_t current_time;
 	// Continuously check t1
 	while (1)
 	{
+		current_time = millis();
 		if (!bb_online)
 		{
 			uart_wake_up_bb();
@@ -121,7 +122,7 @@ void uartTask(void *ignore)
 			// Clear tx buffers to prevent overload on wake up
 			tx_queue_size = 0;
 			tx_ack_queue_size = 0;
-			delay(50);
+			delay(1000);
 			continue;
 		}
 
@@ -215,12 +216,9 @@ void uart_copy_cmd(uint8_t** cmd_queue, int* bytes_copied, int max_arr_size)
 // adds the messages to the queue if they require action
 static void read_all()
 {
-	int c;
-	while (true)
+	while (!feof(uart1))
 	{
-		c = fgetc(uart1);
-		if (c == -1) return;
-		rx_buf.data[rx_buf_size++] = (char)(c & 0xFF);
+		rx_buf.data[rx_buf_size++] = (uint8_t)(fgetc(uart1) & 0xFF);
 		if (rx_buf_size >= PACKET_SIZE)
 		{
 			rx_buf_size = 0;
@@ -239,8 +237,7 @@ static void read_all()
 				switch (command_name){
 
 					case RX_HEARTBEAT:
-						// TODO get T1 value
-						//last_heartbeat_rcvd = T1;
+						last_heartbeat_rcvd = millis();
 						break;
 
 					case RX_FORWARD:
@@ -336,8 +333,7 @@ static void check_ack_queue()
 	for (; index < tx_ack_queue_size; index++)
 	{
 		temp = tx_ack_queue[index];
-		// TODO set current_time to T1 value
-		current_time = 0;
+		current_time = millis();
 		if (current_time - temp.time_sent > TIMEOUT_MS)
 		{
 			build_xmit_cmd(
@@ -363,8 +359,7 @@ static void xmit_all()
 		if (tx_msg_queue[index].ack)
 		{
 			tx.original = tx_msg_queue[index];
-			// TODO get current value of T1
-			//tx.time_sent = T1;
+			tx.time_sent = millis();
 			tx_ack_queue[tx_ack_queue_size++] = tx;
 		}
 	}
