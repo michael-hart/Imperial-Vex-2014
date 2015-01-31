@@ -54,18 +54,16 @@
  */
 void operatorControl() {
 	taskCreate(uartTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
-	uart_wake_up_bb();
 	printf("Hello, Debug Stream!");
 	while (1) {
 		if (!feof(uart2)) {
-			printf("\n");
+			printf("\r\n");
 		}
 		while (!feof(uart2))
 		{
-			printf("%2x ", fgetc(uart2));
+			printf("%02x ", fgetc(uart2));
 		}
 
-		delay(50);
-
+		delay(20);
 	}
 }
