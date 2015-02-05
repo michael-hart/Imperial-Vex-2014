@@ -77,6 +77,8 @@ void operatorControl() {
 	int rightDrive = 0, leftDrive = 0;
 	int left_lift_rate = 0, right_lift_rate = 0;
 
+	printf("Cortex Online\r\n");
+
 	// Create threaded tasks
 	taskCreate(uartTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 	taskCreate(lcdTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
@@ -145,7 +147,7 @@ static void update_lift_rates(int *left, int *right) {
 
 	left_pot = left_offset - analogRead(SENSOR_POT_LEFT);
 	right_pot = analogRead(SENSOR_POT_RIGHT) - right_offset;
-	printf("Left: %d; Right: %d.", left_pot, right_pot);
+	//printf("Left: %d; Right: %d.", left_pot, right_pot);
 
 	if (abs(right_pot - left_pot) > 500) {
 		*left = 0;
