@@ -40,7 +40,8 @@ class UART:
     		return
         waiting = self.serial.inWaiting()
         if waiting > 0:
-            self.buffer += self.serial.read(waiting)
+            # list does conversion from bytes, which is string, to list of characters
+            self.buffer += list(self.serial.read(waiting))
             # Check fletcher of first five bytes
             if len(self.buffer) > 4:
                 if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:4]):
