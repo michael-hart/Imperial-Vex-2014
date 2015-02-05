@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import Adafruit_BBIO.UART as UART
 import serial
 import atexit
 import threading
@@ -10,18 +9,18 @@ import fletcher
 ser = None
 continue_thread = True
 
-class BB_UART:
-    """ A class containing methods for BeagleBoard UART """
+class UART:
+    """ A class containing methods for RPi UART """
     
-    def __init__(self, uart_name = "UART1", open_port = "/dev/ttyO1"):
-        """ Opens given port in non-blocking mode at baud rate 19.2k,
-            or UART1 by default """
-        UART.setup(uart_name)
-        self.serial = serial.Serial(port=open_port, baudrate=19200, timeout=0)
+    def __init__(self, open_port = "/dev/ttyAMA0", baud_rate=115200):
+        """ Opens given port in non-blocking mode at baud rate 115.2k """
+        self.serial = serial.Serial(port=open_port, baudrate=baud_rate, timeout=0)
         self.serial.close()
         self.serial.open()
         assert self.serial.isOpen()
         atexit.register(self.cleanup)
+	self.serial.flushInput()
+	self.serial.flushOutput()
         self.thread = threading.Thread(target=self.poll, args=())
         self.thread.start()
         self.buffer = []
@@ -55,12 +54,10 @@ class BB_UART:
         # UART.cleanup()
         
 def uart_main():
-    uart = BB_UART()
+    uart = UART()
     if uart == None:
         print "Failed to open"
         return
-    print "writing to uart"
-    uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
     	result = uart.poll()
