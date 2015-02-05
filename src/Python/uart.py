@@ -19,11 +19,15 @@ class UART:
         self.serial.open()
         assert self.serial.isOpen()
         atexit.register(self.cleanup)
-	self.serial.flushInput()
-	self.serial.flushOutput()
+        self.serial.flushInput()
+        self.serial.flushOutput()
         self.thread = threading.Thread(target=self.poll, args=())
         self.thread.start()
         self.buffer = []
+
+        # Check length of command list to see if data is waiting
+        self.command_list = []
+        self.command_lock = threading.Lock()
     
     def write(self, s):
         """ Writes the string s to the serial port """
@@ -31,22 +35,58 @@ class UART:
         self.serial.write(s)
         
     def poll(self):
-	if continue_thread == False:
-		cleanup()
-		return
-        c = self.serial.read(5)
-        if not c is None:
-            self.buffer += c
-            # Split buffer into five and check fletcher
+    	if continue_thread == False:
+    		cleanup()
+    		return
+        waiting = self.serial.inWaiting()
+        if waiting > 0:
+            self.buffer += self.serial.read(waiting)
+            # Check fletcher of first five bytes
             if len(self.buffer) > 4:
-            	c = self.buffer[:5]
-            	self.buffer = self.buffer[5:]
-            	print "fletcher of c is:"
-            	print fletcher.fletcher16(c)
-            	return " ".join(map(lambda n: format(ord(n), 'x'), c))
+                if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:4]):
+                    # Fletcher checks out, append to command list and delete from buffer
+                    self.add_command_thread_safe(self.buffer[:5])
+                    self.buffer = self.buffer[5:]
+                    print "Command added normally. Command,Data is:"
+                else:
+                    # Fletcher not checked out. Either packet is corrupt or we're out of sync
+                    # Iterate over list until a valid checksum appears and destroy previous data.
+                    for i in range(len(self.buffer)):
+                        if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+4]):
+                            self.add_command_thread_safe(self.buffer[i:i+5])
+                            self.buffer = self.buffer[i+5:]
+                            print "Forced to resync. Command,Data is:"
+                            break
         else:
             time.sleep(10)
-            return None
+
+    def add_command_thread_safe(self, cmd):
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            self.command_list += (cmd[0], cmd[2])
+            print " ".join(map(lambda n: format(ord(n), 'x'), self.command_list[-1])
+
+    def commands_waiting(self):
+        commands = 0
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            commands = len(self.command_list)
+        return commands
+
+    def get_commands_thread_safe(self):
+        cmd_copy = []
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            # list creation copies out the list
+            cmd_copy = list(self.command_list)
+            self.command_list = []
+        return cmd_copy
     
     def cleanup(self):
         self.serial.close()
