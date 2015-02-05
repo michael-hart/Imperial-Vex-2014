@@ -1,24 +1,25 @@
 
-def compute(data_to_checksum, size, modulo=255, limit = None):
-    _sum, sum_of_sum = 1, 0
-    length = len(data_to_checksum)
-    if limit is not None and length > limit:
-        data_to_checksum = data_to_checksum[:limit]
-    for char in data_to_checksum:
-        _sum += ord(char)
-	sum_of_sum += _sum
-	_sum %= modulo
-	sum_of_sum += _sum
-	sum_of_sum %= modulo
-    return (sum_of_sum << (size / 2 )) + _sum
-
 def fletcher16(data_to_checksum):
-    return compute(data_to_checksum, 8, 255, limit=21)
+    """ Data in is assumed to be string characters, rather than numbers """
+    assert type(data_to_checksum[0]) == str
+    sum1, sum2 = 0, 0
+    for i in data_to_checksum:
+        sum1 = (sum1 + ord(i)) % 255
+        sum2 = (sum2 + sum1) % 255
+    return (sum2 << 8) | sum1
 	
 def compare_checksum(data_to_checksum, checksum):
     chk = fletcher16(data_to_checksum)
-    return ((chk / 100 == ord(checksum[0])) & (chk % 100 == ord(checksum[1])))
+    return chk == (ord(checksum[0]) << 8) + ord(checksum[1])
 	
 	
 if __name__ == "__main__":
-    import test.fletcher_test
+    test_arr = map(chr, [1, 0x22, 0])
+    c16 = fletcher16(test_arr)
+    # Results generated using C functions
+    assert (c16 >> 8) == 0x47
+    assert (c16 & 0xFF) == 0x23
+    test_arr += chr((c16 >> 8) & 0xFF)
+    test_arr += chr(c16 & 0xFF)
+    assert compare_checksum(test_arr[:3], test_arr[3:])
+    print "Test completed successfully"
