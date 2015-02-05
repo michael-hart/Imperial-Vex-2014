@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import Adafruit_BBIO.UART as UART
 import serial
 import atexit
 import threading
@@ -10,21 +9,25 @@ import fletcher
 ser = None
 continue_thread = True
 
-class BB_UART:
-    """ A class containing methods for BeagleBoard UART """
+class UART:
+    """ A class containing methods for RPi UART """
     
-    def __init__(self, uart_name = "UART1", open_port = "/dev/ttyO1"):
-        """ Opens given port in non-blocking mode at baud rate 19.2k,
-            or UART1 by default """
-        UART.setup(uart_name)
-        self.serial = serial.Serial(port=open_port, baudrate=19200, timeout=0)
+    def __init__(self, open_port = "/dev/ttyAMA0", baud_rate=115200):
+        """ Opens given port in non-blocking mode at baud rate 115.2k """
+        self.serial = serial.Serial(port=open_port, baudrate=baud_rate, timeout=0)
         self.serial.close()
         self.serial.open()
         assert self.serial.isOpen()
         atexit.register(self.cleanup)
+        self.serial.flushInput()
+        self.serial.flushOutput()
         self.thread = threading.Thread(target=self.poll, args=())
         self.thread.start()
         self.buffer = []
+
+        # Check length of command list to see if data is waiting
+        self.command_list = []
+        self.command_lock = threading.Lock()
     
     def write(self, s):
         """ Writes the string s to the serial port """
@@ -32,22 +35,59 @@ class BB_UART:
         self.serial.write(s)
         
     def poll(self):
-	if continue_thread == False:
-		cleanup()
-		return
-        c = self.serial.read(5)
-        if not c is None:
-            self.buffer += c
-            # Split buffer into five and check fletcher
+    	if continue_thread == False:
+    		cleanup()
+    		return
+        waiting = self.serial.inWaiting()
+        if waiting > 0:
+            self.buffer += self.serial.read(waiting)
+            # Check fletcher of first five bytes
             if len(self.buffer) > 4:
-            	c = self.buffer[:5]
-            	self.buffer = self.buffer[5:]
-            	print "fletcher of c is:"
-            	print fletcher.fletcher16(c)
-            	return " ".join(map(lambda n: format(ord(n), 'x'), c))
+                if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:4]):
+                    # Fletcher checks out, append to command list and delete from buffer
+                    self.add_command_thread_safe(self.buffer[:5])
+                    self.buffer = self.buffer[5:]
+                    print "Command added normally. Command,Data is:"
+                else:
+                    # Fletcher not checked out. Either packet is corrupt or we're out of sync
+                    # Iterate over list until a valid checksum appears and destroy previous data.
+                    for i in range(len(self.buffer)):
+                        if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+4]):
+                            self.add_command_thread_safe(self.buffer[i:i+5])
+                            self.buffer = self.buffer[i+5:]
+                            print "Forced to resync. Command,Data is:"
+                            break
         else:
             time.sleep(10)
-            return None
+
+    def add_command_thread_safe(self, cmd):
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            self.command_list += (cmd[0], cmd[2])
+            print " ".join(map(lambda n: format(ord(n), 'x'), self.command_list[-1]))
+
+
+    def commands_waiting(self):
+        commands = 0
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            commands = len(self.command_list)
+        return commands
+
+    def get_commands_thread_safe(self):
+        cmd_copy = []
+        while self.command_lock.locked():
+            # Wait for lock to clear
+            time.sleep(0.001)
+        with self.command_lock:
+            # list creation copies out the list
+            cmd_copy = list(self.command_list)
+            self.command_list = []
+        return cmd_copy
     
     def cleanup(self):
         self.serial.close()
@@ -55,12 +95,10 @@ class BB_UART:
         # UART.cleanup()
         
 def uart_main():
-    uart = BB_UART()
+    uart = UART()
     if uart == None:
         print "Failed to open"
         return
-    print "writing to uart"
-    uart.write("dddddddddddddddddd")
     print "Port open. Listening..."
     while True:
     	result = uart.poll()
