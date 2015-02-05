@@ -66,7 +66,8 @@ class UART:
             time.sleep(0.001)
         with self.command_lock:
             self.command_list += (cmd[0], cmd[2])
-            print " ".join(map(lambda n: format(ord(n), 'x'), self.command_list[-1])
+            print " ".join(map(lambda n: format(ord(n), 'x'), self.command_list[-1]))
+
 
     def commands_waiting(self):
         commands = 0
