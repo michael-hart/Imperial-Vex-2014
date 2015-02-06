@@ -52,7 +52,7 @@ class UART:
                 else:
                     # Fletcher not checked out. Either packet is corrupt or we're out of sync
                     # Iterate over list until a valid checksum appears and destroy previous data.
-                    for i in range(len(self.buffer)):
+                    for i in range(len(self.buffer)-4):
                         if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+5]):
                             self.add_command_thread_safe(self.buffer[i:i+5])
                             self.buffer = self.buffer[i+5:]
@@ -102,10 +102,7 @@ def uart_main():
         return
     print "Port open. Listening..."
     while True:
-    	result = uart.poll()
-    	if not result is None:
-    		print result
-	time.sleep(0.01)    	
+	   time.sleep(0.1)    	
 
 if __name__ == '__main__':
     uart_main()
