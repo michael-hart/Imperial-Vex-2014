@@ -10,6 +10,7 @@ def fletcher16(data_to_checksum):
 	
 def compare_checksum(data_to_checksum, checksum):
     chk = fletcher16(data_to_checksum)
+    print "Checking: " + " ".join([hex(ord(x)) for x in data_to_checksum])
     return chk == (ord(checksum[0]) << 8) + ord(checksum[1])
 	
 	

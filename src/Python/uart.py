@@ -43,7 +43,7 @@ class UART:
             self.buffer += self.serial.read(waiting)
             # Check fletcher of first five bytes
             if len(self.buffer) > 4:
-                if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:4]):
+                if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:5]):
                     # Fletcher checks out, append to command list and delete from buffer
                     self.add_command_thread_safe(self.buffer[:5])
                     self.buffer = self.buffer[5:]
@@ -52,7 +52,7 @@ class UART:
                     # Fletcher not checked out. Either packet is corrupt or we're out of sync
                     # Iterate over list until a valid checksum appears and destroy previous data.
                     for i in range(len(self.buffer)):
-                        if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+4]):
+                        if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+5]):
                             self.add_command_thread_safe(self.buffer[i:i+5])
                             self.buffer = self.buffer[i+5:]
                             print "Forced to resync. Command,Data is:"
