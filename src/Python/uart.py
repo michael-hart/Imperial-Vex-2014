@@ -57,10 +57,10 @@ class UART:
         self.serial.write(s)
 
     def thread_poll(self):
-	while continue_thread:
-	    self.poll()
-	    time.sleep(0.01)
-	print "Stopped due to continue_thread is False"
+    	while continue_thread:
+    	    self.poll()
+    	    time.sleep(0.01)
+    	print "Stopped due to continue_thread is False"
         
     def poll(self):
         # Check for thread killing
@@ -75,8 +75,8 @@ class UART:
             self.process_rcv_buffer()
 
         # Check for last hearbeat, and send new one if necessary
-        if time.time() - last_heartbeat_sent > 0.03:
-            last_heartbeat_sent = time.time()
+        if time.time() - self.last_heartbeat_sent > 0.03:
+            self.last_heartbeat_sent = time.time()
             self.heartbeat()
 
         # Write any waiting commands and acknowledges
@@ -90,7 +90,7 @@ class UART:
                 if (cmd[0] == 0x2 or cmd[0] == 0x4 or cmd[0] ==  0x10):
                     ack_buffer.append( (cmd, time.time()) )
                 # Send!
-                self.serial.write(''.join(cmd))
+                self.serial.write(''.join(map(chr,cmd)))
 
 
     def process_rcv_buffer(self):
@@ -186,12 +186,12 @@ def uart_main():
         return
     print "Port open. Listening..."
     while True:
-	try:
+    	try:
             uart.write("".join(map(chr,[1, 0x22, 0, 0x47, 0x23])))
             time.sleep(5)
-	except KeyboardInterrupt:
-	    continue_thread = False
-	    return
+    	except KeyboardInterrupt:
+    	    continue_thread = False
+    	    return
 
 if __name__ == '__main__':
     uart_main()
