@@ -71,7 +71,7 @@ class UART:
         waiting = self.serial.inWaiting()
         if waiting > 0:
             # list does conversion from bytes, which is string, to list of characters
-            self.buffer += map(ord, list(,self.serial.read(waiting)))
+            self.buffer += map(ord, list(self.serial.read(waiting)))
             self.process_rcv_buffer()
 
         # Check for last hearbeat, and send new one if necessary
@@ -100,7 +100,7 @@ class UART:
             if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:5]):
                 # Fletcher checks out, append to command list and delete from buffer
                 if (self.buffer[0] == rx_wake_up or self.buffer[0] == rx_left_encoder or self.buffer[0] == rx_right_encoder):
-                    acknowledge(buffer[1])
+                    self.acknowledge(buffer[1])
                 self.add_command_thread_safe(self.buffer[:5])
                 self.buffer = self.buffer[5:]
             else:
@@ -109,7 +109,7 @@ class UART:
                 for i in range(len(self.buffer)-4):
                     if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+5]):
                         if (self.buffer[i] == rx_wake_up or self.buffer[i] == rx_left_encoder or self.buffer[i] == rx_right_encoder):
-                            acknowledge(buffer[i+1])
+                            self.acknowledge(buffer[i+1])
                         self.add_command_thread_safe(self.buffer[i:i+5])
                         self.buffer = self.buffer[i+5:]
                         break
@@ -174,7 +174,7 @@ class UART:
         self.build_command(tx_lift_height, data)
     
     def cleanup(self):
-	continue_thread = False
+        continue_thread = False
         self.serial.close()
         # Not yet implemented, but will be done
         # UART.cleanup()
