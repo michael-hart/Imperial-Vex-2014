@@ -71,7 +71,7 @@ class UART:
         waiting = self.serial.inWaiting()
         if waiting > 0:
             # list does conversion from bytes, which is string, to list of characters
-            self.buffer += list(self.serial.read(waiting))
+            self.buffer += map(ord, list(,self.serial.read(waiting)))
             self.process_rcv_buffer()
 
         # Check for last hearbeat, and send new one if necessary
