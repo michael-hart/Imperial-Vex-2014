@@ -91,6 +91,7 @@ class UART:
                     ack_buffer.append( (cmd, time.time()) )
                 # Send!
                 self.serial.write(''.join(map(chr,cmd)))
+	    self.send_buffer = []
 
 
     def process_rcv_buffer(self):
@@ -187,7 +188,6 @@ def uart_main():
     print "Port open. Listening..."
     while True:
     	try:
-            uart.write("".join(map(chr,[1, 0x22, 0, 0x47, 0x23])))
             time.sleep(5)
     	except KeyboardInterrupt:
     	    continue_thread = False
