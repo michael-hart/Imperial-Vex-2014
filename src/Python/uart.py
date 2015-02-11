@@ -100,7 +100,7 @@ class UART:
             if fletcher.compare_checksum(self.buffer[:3], self.buffer[3:5]):
                 # Fletcher checks out, append to command list and delete from buffer
                 if (self.buffer[0] == rx_wake_up or self.buffer[0] == rx_left_encoder or self.buffer[0] == rx_right_encoder):
-                    self.acknowledge(buffer[1])
+                    self.acknowledge(self.buffer[1])
                 self.add_command_thread_safe(self.buffer[:5])
                 self.buffer = self.buffer[5:]
             else:
@@ -109,7 +109,7 @@ class UART:
                 for i in range(len(self.buffer)-4):
                     if fletcher.compare_checksum(self.buffer[i:i+3], self.buffer[i+3:i+5]):
                         if (self.buffer[i] == rx_wake_up or self.buffer[i] == rx_left_encoder or self.buffer[i] == rx_right_encoder):
-                            self.acknowledge(buffer[i+1])
+                            self.acknowledge(self.buffer[i+1])
                         self.add_command_thread_safe(self.buffer[i:i+5])
                         self.buffer = self.buffer[i+5:]
                         break
@@ -120,7 +120,7 @@ class UART:
             time.sleep(0.001)
         with self.command_lock:
             self.command_list.append(tuple([cmd[0], cmd[2]]))
-	    print " ".join([hex(ord(x)) for x in self.command_list[-1]])
+	    print " ".join([hex(x) for x in self.command_list[-1]])
 
     def commands_waiting(self):
         commands = 0
